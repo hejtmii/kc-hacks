@@ -19,6 +19,8 @@ We are using `~` as the last printable ASCII char to give the next subsequent st
 
 NOTE: In other languages or if it is likely that the value contains `~`, you may need to use some higher Unicode char encoded in the query string instead of `~`.
 
+NOTE 2: The prefix value can't contain comma `,` not even URL encoded as the request parser can't differentiate between comma to separate range values, and comma within individial value
+
 ## Filtering value for a custom element with a richer data model
 
 Imagine you have a custom element with JSON value containing some extra metadata needed for the default custom element visualization (which should work even without contacting the 3rd party system). Here is an example of such value (pretty-printed, the actual value is on one line):
