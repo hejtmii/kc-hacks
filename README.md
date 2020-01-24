@@ -1,17 +1,18 @@
-# kc-hacks
-Useful hacks for things you might not know can be done in Kentico Cloud
+# Kentico Kontent Hacks
+
+Useful hacks for things you might not know can be done in Kentico Kontent
 
 ## Starts with filter at the Delivery API
 
-[Filtering in Delivery API](https://developer.kenticocloud.com/reference#content-filtering) doesn't provide any [startswith] operator. Normally, you would want it this way:
+[Filtering in Delivery API](https://docs.kontent.ai/reference/kentico-kontent-apis-overview#content-filtering) doesn't provide any [startswith] operator. Normally, you would want it this way:
 
-```
+```plain
 ?elements.myelement[startswith]=prefix
 ```
 
 Still it is possible to filter this way. Try to use the following instead to provide this behavior:
 
-```
+```plain
 ?elements.myelement[range]=prefix,prefix~
 ```
 
@@ -25,7 +26,7 @@ NOTE 2: The prefix value can't contain comma `,` not even URL encoded as the req
 
 Imagine you have a custom element with JSON value containing some extra metadata needed for the default custom element visualization (which should work even without contacting the 3rd party system). Here is an example of such value (pretty-printed, the actual value is on one line):
 
-```
+```json
 {
   "experiment": {
     "id": "YI5uxeAkRZ-0E1-7oQ5FXg",
@@ -42,7 +43,7 @@ Filtering by experiment ID at Delivery API with this kind of value is impossible
 
 What you can do, however, is to make the value like this, separating the filtering value, and place it at the start of the value in a deterministic way (again, pretty-printed):
 
-```
+```json
 [
   "YI5uxeAkRZ-0E1-7oQ5FXg",
   {
@@ -60,8 +61,28 @@ What you can do, however, is to make the value like this, separating the filteri
 
 With this, the value can be still handled with JSON.stringify and JSON.parse, but starts deterministically like this (not pretty-printed) `["YI5uxeAkRZ-0E1-7oQ5FXg"` and you can now filter by the experiment ID with the Starts with filter shown above.
 
-```
+```plain
 ?elements.myelement[range]=["YI5uxeAkRZ-0E1-7oQ5FXg",["YI5uxeAkRZ-0E1-7oQ5FXg"~
 ```
 
 It's like having a cake, and eating it, too ...
+
+## Mapping delivery response to JS SDK response
+
+It is possible to use `mappingService` to [transform HTTP response to JS SDK object representation](https://github.com/Kentico/kontent-delivery-sdk-js/pull/218/files).
+
+```js
+const response = fetch(deliveryEndpointURL,
+  .then((response) => response.json())
+    .then((json) => {
+      const baseResponse = {
+        data: json,
+        headers: [],
+        json,
+        status: 200,
+      };
+      const client = new DeliveryClient(deliveryClientConfig);
+      const resolvedItem = client.mappingService
+        .viewContentItemResponse(baseResponse, {});
+    });
+```
