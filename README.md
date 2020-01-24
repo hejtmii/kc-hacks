@@ -72,7 +72,7 @@ It's like having a cake, and eating it, too ...
 It is possible to use `mappingService` to [transform HTTP response to JS SDK object representation](https://github.com/Kentico/kontent-delivery-sdk-js/pull/218/files).
 
 Imagine you have a custom element with JSON value containing some extra metadata needed for [the custom model for custom element visualization] (which should work even without contacting the 3rd party system).
-Here is an example of such value (pretty-printed, the actual value is on the last line):
+Here is an showcase of getting the red color value from your color picker custom element:
 
 ```js
 import { ElementModels, Elements } from '@kentico/kontent-delivery';
