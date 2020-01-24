@@ -71,9 +71,9 @@ It's like having a cake, and eating it, too ...
 
 It is possible to transform JSON HTTP response to JS SDK object representation using JS SDK delivery client `mappingService` introduced in [this pull request](https://github.com/Kentico/kontent-delivery-sdk-js/pull/218/files).
 
-Imagine you have a custom element with the value containing complex JSON and you want to use [the custom model for it](https://github.com/Kentico/kontent-delivery-sdk-js/blob/master/DOCS.md#using-custom-models-for-custom-elements) (which should work even without contacting the 3rd party system).
+Imagine you have a custom element with the value containing stringified complex JSON and you want to use [the custom model for it](https://github.com/Kentico/kontent-delivery-sdk-js/blob/master/DOCS.md#using-custom-models-for-custom-elements) (which should work even without contacting the 3rd party system).
 
-Following code snippet showcase getting the red color value from your color picker custom element storing the color JSON `"{\"red\":167,\"green\":96,\"blue\":197}"`:
+Following code snippet showcase getting the red color value from your color picker custom element storing the color stringified JSON `"{\"red\":167,\"green\":96,\"blue\":197}"`:
 
 ```js
 import { ElementModels, Elements } from '@kentico/kontent-delivery';
