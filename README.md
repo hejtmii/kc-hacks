@@ -71,7 +71,32 @@ It's like having a cake, and eating it, too ...
 
 It is possible to use `mappingService` to [transform HTTP response to JS SDK object representation](https://github.com/Kentico/kontent-delivery-sdk-js/pull/218/files).
 
+Imagine you have a custom element with JSON value containing some extra metadata needed for [the custom model for custom element visualization] (which should work even without contacting the 3rd party system).
+Here is an example of such value (pretty-printed, the actual value is on the last line):
+
 ```js
+import { ElementModels, Elements } from '@kentico/kontent-delivery';
+
+class ColorElement extends Elements.CustomElement {
+
+    public red;
+    public green;
+    public blue;
+
+    constructor(
+       public elementWrapper
+    ) {
+      super(elementWrapper);
+
+      const value = elementWrapper.rawElement.value; // "{\"red\":167,\"green\":96,\"blue\":197}"
+      const parsed = JSON.parse(value);
+      this.red = parsed.red;
+      this.green = parsed.green;
+      this.blue = parsed.blue;
+    }
+}
+
+const deliveryEndpointURL = 'https://deliver.kontent.ai/<PROJECTID>/items/<ITEM_CODENAME>';
 const response = fetch(deliveryEndpointURL,
   .then((response) => response.json())
     .then((json) => {
@@ -81,8 +106,19 @@ const response = fetch(deliveryEndpointURL,
         json,
         status: 200,
       };
-      const client = new DeliveryClient(deliveryClientConfig);
+      const client = new DeliveryClient({
+        projectId: ''.
+        elementResolver: (elementWrapper: ElementModels.IElementMapWrapper) => {
+          if (elementWrapper.contentItemSystem.type === 'your-content-type' && elementWrapper.rawElement.name === 'your-element-name') {
+            return new ColorElement(elementWrapper);
+          }
+
+          return undefined;
+        }
+      });
       const resolvedItem = client.mappingService
         .viewContentItemResponse(baseResponse, {});
+
+      const redColorPart = redresolvedItem.item['your-element-name'].red;
     });
 ```
