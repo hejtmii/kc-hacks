@@ -67,13 +67,15 @@ With this, the value can be still handled with JSON.stringify and JSON.parse, bu
 
 It's like having a cake, and eating it, too ...
 
-## Mapping delivery response to JS SDK response
+## Mapping item data to JS SDK representation
 
-It is possible to transform JSON HTTP response to JS SDK object representation using JS SDK delivery client `mappingService` introduced in [this pull request](https://github.com/Kentico/kontent-delivery-sdk-js/pull/218/files).
+It is possible to transform item data to JS SDK object representation using JS SDK delivery client's `mappingService` introduced in [this pull request](https://github.com/Kentico/kontent-delivery-sdk-js/pull/218/files).
 
-Imagine you have a custom element with the value containing stringified complex JSON and you want to use [the custom model for it](https://github.com/Kentico/kontent-delivery-sdk-js/blob/master/DOCS.md#using-custom-models-for-custom-elements) (which should work even without contacting the 3rd party system).
+Let's imagine the situation when your item data comes from other source than Delivery API directly, which may be some proxy for secured Delivery API, or a mock.
 
-Following code snippet showcase getting the red color value from your color picker custom element storing the color stringified JSON `"{\"red\":167,\"green\":96,\"blue\":197}"`:
+The value of custom element contains stringified complex JSON and you want to use [the custom model for it](https://github.com/Kentico/kontent-delivery-sdk-js/blob/master/DOCS.md#using-custom-models-for-custom-elements) or any other feature that JS SDK offers.
+
+Following code snippet showcase transforming item data and then using custom model mapping to get the red color value from your color picker custom element.
 
 ```js
 import { ElementModels, Elements } from '@kentico/kontent-delivery';
@@ -97,29 +99,47 @@ class ColorElement extends Elements.CustomElement {
     }
 }
 
-const deliveryEndpointURL = 'https://deliver.kontent.ai/<PROJECTID>/items/<ITEM_CODENAME>';
-const response = fetch(deliveryEndpointURL,
-  .then((response) => response.json())
-    .then((json) => {
-      const baseResponse = {
-        data: json,
-        headers: [],
-        json,
-        status: 200,
-      };
-      const client = new DeliveryClient({
-        projectId: '',
-        elementResolver: (elementWrapper: ElementModels.IElementMapWrapper) => {
-          if (elementWrapper.contentItemSystem.type === 'your-content-type' && elementWrapper.rawElement.name === 'your-element-name') {
-            return new ColorElement(elementWrapper);
-          }
+const item = { // Data returned from the proxy, or mock
+  "item" : {
+    "system": {
+      "id": "ef23e568-6aa2-42cd-a120-7823c0ef19f7",
+      "name": "Color",
+      "codename": "color",
+      "language": "en-US",
+      "type": "color",
+      "sitemap_locations": [],
+      "last_modified": "2019-03-27T13:10:01.791Z"
+    },
+    "elements": {
+      "picked": {
+        "type": "text",
+        "name": "Picked",
+        "value": "\"red\":167,\"green\":96,\"blue\":197}"
+      }
+    }
+  },
+  "modular_content": {}
+};
 
-          return undefined;
-        }
-      });
-      const resolvedItem = client.mappingService
-        .viewContentItemResponse(baseResponse, {});
+const baseResponse = {
+  data: item,
+  headers: [],
+  item,
+  status: 200,
+};
 
-      const redColorPart = redresolvedItem.item['your-element-name'].red;
-    });
+const client = new DeliveryClient({
+  projectId: '',
+  elementResolver: (elementWrapper) => {
+    if (elementWrapper.contentItemSystem.type === 'color' && elementWrapper.rawElement.name === 'picked') {
+      return new ColorElement(elementWrapper);
+    }
+
+    return undefined;
+  }
+});
+const resolvedItem = client.mappingService
+  .viewContentItemResponse(baseResponse, {});
+
+const redColorPart = resolvedItem.item.picked.red;
 ```
